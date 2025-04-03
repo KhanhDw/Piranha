@@ -23,3 +23,8 @@ flutter pub get
 flutter build apk --release
 
 flutter run
+
+
+Ctrl + P : tìm file bằng copy đường dẫn
+điều chỉnh lại AplicationID tại: android\app\src\main\AndroidManifest.xml
+điều chỉnh lại id quảng cáo thât: "adUnitId:" -->  lib\main.dart

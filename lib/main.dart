@@ -4,6 +4,9 @@ import 'services/api_service.dart';
 import 'models/photo.dart';
 import 'photo_detail_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'ad_logs_screen.dart'; // Import màn hình nhật ký
 
 void main() {
   try {
@@ -16,7 +19,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,16 +48,23 @@ class _PhotoListScreenState extends State<PhotoListScreen> {
   late BannerAd _bannerAd;
   bool _isBannerAdLoaded = false;
 
+   // ID đơn vị quảng cáo thử nghiệm cho banner
+  final String _adUnitIdTestBanner = 'ca-app-pub-3940256099942544/6300978111'; // Android
+  // Sử dụng 'ca-app-pub-3940256099942544/2934735716' cho iOS
+
+  // ID đơn vị quảng cáo thật cho banner - quảng cáo 1
+  final String _adUnitIdRealBanner = 'ca-app-pub-4590752034914989/5961673035'; // ads Android real ☆
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener); 
     _loadMorePhotos();
 
     // Khởi tạo quảng cáo Banner
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-4590752034914989/5961673035', // Thay thế bằng Ad Unit ID của bạn
+      adUnitId: _adUnitIdTestBanner, // Thay thế bằng Ad Unit ID của bạn ☆
       size: AdSize.banner, // Kích thước banner
       request: AdRequest(),
       listener: BannerAdListener(
@@ -62,12 +72,16 @@ class _PhotoListScreenState extends State<PhotoListScreen> {
           setState(() {
             _isBannerAdLoaded = true;
           });
+          print("Banner Ad loaded successfully");
+          logAdImpression('user_123'); // Gọi hàm logAdImpression với userId
         },
         onAdFailedToLoad: (ad, error) {
           print('Failed to load banner ad: $error');
+          ad.dispose();
         },
       ),
-    )..load();
+    );
+    _bannerAd.load(); // Tải quảng cáo
   }
 
   @override
@@ -121,6 +135,16 @@ class _PhotoListScreenState extends State<PhotoListScreen> {
             fontWeight: FontWeight.bold,
           ),
           backgroundColor: const Color.fromARGB(255, 19, 20, 29),
+           actions: [
+                ElevatedButton(
+                  onPressed: () { Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdLogsScreen()),
+                  );
+                },
+                child: Text('Logs'),
+                ),
+              ],
         ),
         backgroundColor: const Color.fromARGB(255, 36, 39, 63),
         body: Stack( // Sử dụng Stack để thêm quảng cáo banner vào cuối màn hình
@@ -162,14 +186,23 @@ class _PhotoListScreenState extends State<PhotoListScreen> {
                 left: 0,
                 right: 0,
                 child: Container(
-                  alignment: Alignment.center,
-                  child: AdWidget(ad: _bannerAd), // Hiển thị banner
-                  height: 50, // Chiều cao của quảng cáo banner
+                  alignment: Alignment.center, // Hiển thị banner
+                  height: 50,
+                  child: AdWidget(ad: _bannerAd), // Chiều cao của quảng cáo banner
                 ),
               ),
           ],
         ),
       ),
     );
+  }
+
+  // lưu trữ dữ liệu cục bộ
+  Future<void> logAdImpression(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now().toIso8601String();
+    final log = prefs.getStringList('ad_logs') ?? [];
+    log.add(jsonEncode({'userId': userId, 'timestamp': now}));
+    await prefs.setStringList('ad_logs', log);
   }
 }

@@ -40,6 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   change_app_package_name: ^1.5.0
   flutter_launcher_icons: ^0.14.3
+  shared_preferences: ^2.5.3 # lưu trữ dữ liệu cục bộ
 
 dev_dependencies:
   flutter_test:
