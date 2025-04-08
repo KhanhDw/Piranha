@@ -1,9 +1,10 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services") 
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
 
 android {
     //compileSdk = flutter.compileSdkVersion
@@ -13,26 +14,40 @@ android {
     namespace = "com.example.flutter_application_2"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
         applicationId = "com.giakhanh.piranha"
-        minSdk = flutter.minSdkVersion
+        //minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("my-release-key.keystore")
+            storePassword = "giakhanh123"
+            keyAlias = "my-key-alias"
+            keyPassword = "giakhanh123"
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            // Có thể sử dụng signingConfig mặc định của debug hoặc cấu hình riêng nếu cần
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -40,4 +55,15 @@ android {
 
 flutter {
     source = "../.."
+}
+
+
+
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:20.8.0")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.extra.get("kotlin_version")}") // Sử dụng biến kotlin_version
 }

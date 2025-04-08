@@ -8,13 +8,18 @@
         android:label="piranha"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- <meta-data
+
+      <!-- Sử dụng App ID thật -->
+        <meta-data
     android:name="com.google.android.gms.ads.APPLICATION_ID"
-    android:value="ca-app-pub-4590752034914989~7706107340"/> -->
+    android:value="ca-app-pub-4590752034914989~7706107340"/>
       <!-- Sử dụng App ID thử nghiệm -->
-    <meta-data
+    <!-- <meta-data
         android:name="com.google.android.gms.ads.APPLICATION_ID"
-        android:value="ca-app-pub-3940256099942544~3347511713"/>
+        android:value="ca-app-pub-3940256099942544~3347511713"/> -->
+
+    
+
         <activity
             android:name="com.giakhanh.piranha.MainActivity"
             android:label="Piranha"

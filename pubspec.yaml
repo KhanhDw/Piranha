@@ -41,6 +41,13 @@ dependencies:
   change_app_package_name: ^1.5.0
   flutter_launcher_icons: ^0.14.3
   shared_preferences: ^2.5.3 # lưu trữ dữ liệu cục bộ
+  intl: ^0.20.2
+  logger: ^2.5.0
+  flutter_native_splash: ^2.4.6
+  firebase_core: ^3.13.0
+  firebase_auth: ^5.5.2
+  google_sign_in: ^6.3.0
+  cloud_firestore: ^5.6.6
 
 dev_dependencies:
   flutter_test:
@@ -72,8 +79,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -101,3 +108,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/splash.png
+  android: true
+  ios: false
+  android_gravity: center
+  fullscreen: true
+  ios_content_mode: scaleAspectFit

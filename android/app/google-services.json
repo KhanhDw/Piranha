@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "902763216988",
+    "project_id": "piranha-c3936",
+    "storage_bucket": "piranha-c3936.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902763216988:android:630a4c2ce3974ce0b7e699",
+        "android_client_info": {
+          "package_name": "com.giakhanh.piranha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902763216988-njl7nir7bsl27uri484ad785ohdlfge5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.giakhanh.piranha",
+            "certificate_hash": "1f02246e79c6dd0d2f762412ddf1787d109edf95"
+          }
+        },
+        {
+          "client_id": "902763216988-6pjufshuc58hdbt98k2a99l2tbsv4e3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvpG7qvZ-hW6LQUvJyVPRX_otl7J79AnQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902763216988-6pjufshuc58hdbt98k2a99l2tbsv4e3b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

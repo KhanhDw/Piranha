@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">902763216988</string>
+    <string name="google_api_key" translatable="false">AIzaSyBvpG7qvZ-hW6LQUvJyVPRX_otl7J79AnQ</string>
+    <string name="google_app_id" translatable="false">1:902763216988:android:630a4c2ce3974ce0b7e699</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBvpG7qvZ-hW6LQUvJyVPRX_otl7J79AnQ</string>
+    <string name="google_storage_bucket" translatable="false">piranha-c3936.firebasestorage.app</string>
+    <string name="project_id" translatable="false">piranha-c3936</string>
+</resources>

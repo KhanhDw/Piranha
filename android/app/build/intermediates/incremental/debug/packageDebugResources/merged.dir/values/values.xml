@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">902763216988</string>
+    <string name="google_api_key" translatable="false">AIzaSyBvpG7qvZ-hW6LQUvJyVPRX_otl7J79AnQ</string>
+    <string name="google_app_id" translatable="false">1:902763216988:android:630a4c2ce3974ce0b7e699</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBvpG7qvZ-hW6LQUvJyVPRX_otl7J79AnQ</string>
+    <string name="google_storage_bucket" translatable="false">piranha-c3936.firebasestorage.app</string>
+    <string name="project_id" translatable="false">piranha-c3936</string>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
