@@ -1,22 +1,35 @@
-plugins {
-    id("com.android.application") version "8.7.0" apply false 
-    id("com.google.gms.google-services") version "4.4.2" apply false 
-}
 
-allprojects {
+buildscript {
     repositories {
         google()
         mavenCentral()
     }
-   dependencies {
-        classpath("com.android.tools.build:gradle:8.7.0") // Đảm bảo phiên bản này đúng
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22") // CẬP NHẬT phiên bản Kotlin plugin lên 1.9.22 hoặc mới hơn
-        classpath("com.google.gms:google-services:4.4.2") // Đảm bảo phiên bản này đúng
-        classpath("io.flutter.tools.gradle:flutter-gradle-plugin")
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0")
+        classpath("com.google.gms:google-services:4.4.2")
     }
-    extra.apply {
-        set("kotlin_version", "1.9.22") // CẬP NHẬT phiên bản Kotlin
+}
+
+extra.apply {
+    set("kotlin_version", "2.0.0") 
+}
+
+allprojects {
+    repositories {
+        google()    
+        mavenCentral()
     }
+    
+}
+
+
+
+
+plugins {
+    id("com.android.application") version "8.7.0" apply false 
+    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.0" apply false 
 }
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()

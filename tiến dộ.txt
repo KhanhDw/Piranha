@@ -1,0 +1,33 @@
+đăng nhập  = google 
+đăng ký = google 
+
+
+trong detail photo loại bỏ làm sạch screen khi rời đi , vì khi rời khỏi đó thì quảng cáo bị xóa, 
+do tỷ lệ khớp khá thấp nên cần phải để đó không được xóa,
+nếu chưa có quảng cáo thì yêu cầu , nếu có tồn tại rồi thì không cần xóa khi rời khỏi trang
+
+đăng nhập bình thường
+đăng ký bình thường
+
+cập nhật eCPM cho cả hệ thống từ admin thông qua firebase 
+
+thêm các ảnh vip nếu muốn tải thì xem quảng cáo dài 
+
+doanh thu mỗi ngày, tại trang thu nhập có nút vào trang doanh thu mỗi ngày
+    ( eCPM mỗi ngày * lượt hiển thị quảng cáo ) / 1000 = doanh thu
+    -> UI mỗi dòng: 
+                    ngày/tháng/năm       eCPM       lượt hiển thị        doanh thu
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,14 +6,14 @@ import 'package:dio/dio.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
-import '../models/PexelsPhoto.dart'; // Giả sử bạn đã định nghĩa model Photo
+import '../models/PexelsPhoto.dart';
 import '../models/UnsplashPhoto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'ad_logs_screen.dart'; // Import màn hình nhật ký
+import 'ad_logs_screen.dart';
 import 'dart:convert';
 
 class PhotoDetailScreen extends StatefulWidget {
-  final dynamic photo; // cần thay đổi để nhận được thêm unslash
+  final dynamic photo;
 
   const PhotoDetailScreen({required this.photo, super.key});
 
@@ -22,66 +22,56 @@ class PhotoDetailScreen extends StatefulWidget {
 }
 
 class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
-  late BannerAd _bannerAd2;
+  BannerAd? _bannerAd2; // Thay đổi thành nullable để kiểm soát tốt hơn
   bool _isBanner2AdLoaded = false;
 
-  // --- Các biến trạng thái để lưu thông tin ảnh ---
   String _imageUrl = '';
-  String _photographerName = 'Unknown';
   String _downloadUrl = '';
-  dynamic _photoIdentifier; // int (Pexels) or String (Unsplash)
+  dynamic _photoIdentifier;
   bool _isValidPhoto = false;
-  // ---------------------------------------------
 
-  // ID đơn vị quảng cáo thử nghiệm cho banner
-  final String _adUnitIdTestBanner =
-      'ca-app-pub-3940256099942544/6300978111'; // Android
-  // ID đơn vị quảng cáo thật cho banner
-  final String _adUnitIdRealBanner =
-      'ca-app-pub-4590752034914989/1520876903'; // Thay bằng ID thật của bạn
+  final String _adUnitIdRealBanner = 'ca-app-pub-4590752034914989/1520876903';
 
   @override
   void initState() {
     super.initState();
-    _extractPhotoInfo(); // Trích xuất thông tin dựa trên model
-    _loadBannerAd();
+    _extractPhotoInfo();
+    _initializeBannerAd(); // Tách logic khởi tạo quảng cáo
   }
 
   void _extractPhotoInfo() {
     if (widget.photo is PexelsPhoto) {
       final pexelsPhoto = widget.photo as PexelsPhoto;
-      // Sử dụng các trường từ PexelsPhoto model của bạn
-      _imageUrl = pexelsPhoto.imageUrl; // -> src.large2x / src.original
-      _photographerName = pexelsPhoto.photographer; // -> photographer
-      _downloadUrl = pexelsPhoto.downloadUrl; // -> src.original
-      _photoIdentifier = pexelsPhoto.id; // -> id (int)
+      _imageUrl = pexelsPhoto.imageUrl;
+      _downloadUrl = pexelsPhoto.downloadUrl;
+      _photoIdentifier = pexelsPhoto.id;
       _isValidPhoto = true;
       print("Photo Type: Pexels");
     } else if (widget.photo is UnsplashPhoto) {
       final unsplashPhoto = widget.photo as UnsplashPhoto;
-      // Sử dụng các trường từ UnsplashPhoto model của bạn
-      _imageUrl = unsplashPhoto.imageUrl; // -> urls.regular
-      _photographerName = unsplashPhoto.photographer; // -> user.name
-      _downloadUrl = unsplashPhoto.downloadUrl; // -> links.download
-      _photoIdentifier = unsplashPhoto.id; // -> id (String)
+      _imageUrl = unsplashPhoto.imageUrl;
+      _downloadUrl = unsplashPhoto.downloadUrl;
+      _photoIdentifier = unsplashPhoto.id;
       _isValidPhoto = true;
       print("Photo Type: Unsplash");
-      // Lưu ý: Unsplash có thể yêu cầu trigger download qua `links.download_location`
-      // Bạn có thể cần thêm logic đó nếu download trực tiếp `links.download` không hoạt động
-      // hoặc để tuân thủ chính sách API của họ.
     } else {
       _isValidPhoto = false;
-      print(
-        "Error: Invalid photo type passed to PhotoDetailScreen. Type was: ${widget.photo?.runtimeType}",
-      );
+      print("Error: Invalid photo type: ${widget.photo?.runtimeType}");
     }
   }
 
-  _loadBannerAd() {
-    // Khởi tạo quảng cáo Banner
+  void _initializeBannerAd() {
+    // Chỉ khởi tạo và tải quảng cáo nếu chưa có
+    if (_bannerAd2 == null) {
+      _loadBannerAd();
+    } else if (!_isBanner2AdLoaded) {
+      _bannerAd2!.load(); // Tải lại nếu đã có instance nhưng chưa load
+    }
+  }
+
+  void _loadBannerAd() {
     _bannerAd2 = BannerAd(
-      adUnitId:
-          _adUnitIdRealBanner, // Thay bằng _adUnitIdRealBanner/ _adUnitIdTestBanner khi phát hành
+      adUnitId: _adUnitIdRealBanner,
       size: AdSize.banner,
       request: AdRequest(),
       listener: BannerAdListener(
@@ -94,16 +84,16 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
         },
         onAdFailedToLoad: (ad, error) {
           print('Failed to load banner ad: $error');
-          ad.dispose();
+          // Không dispose ở đây để giữ instance, có thể thử tải lại sau
         },
       ),
     );
-    _bannerAd2.load(); // Tải quảng cáo
+    _bannerAd2!.load();
   }
 
   @override
   void dispose() {
-    _bannerAd2.dispose(); // Giải phóng tài nguyên quảng cáo khi thoát màn hình
+    // Không dispose _bannerAd2 để giữ quảng cáo tồn tại
     super.dispose();
   }
 
@@ -122,21 +112,15 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
 
     if (downloadUrl.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không tìm thấy URL để tải xuống.')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không tìm thấy URL để tải xuống.')),
+      );
       return;
     }
 
     PermissionStatus status;
     if (Platform.isAndroid) {
-      if (await Permission.manageExternalStorage.isGranted) {
-        status = PermissionStatus.granted;
-      } else {
-        status = await Permission.manageExternalStorage.request();
-      }
+      status = await Permission.manageExternalStorage.request();
     } else {
       status = await Permission.storage.request();
     }
@@ -147,20 +131,17 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
           const SnackBar(content: Text('Quyền lưu trữ bị từ chối')),
         );
       } else if (status.isPermanentlyDenied) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Quyền lưu trữ bị từ chối vĩnh viễn. Vui lòng bật nó trong cài đặt ứng dụng.',
-              ),
-              action: SnackBarAction(
-                label: 'Mở Cài đặt',
-                onPressed: openAppSettings,
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Quyền lưu trữ bị từ chối vĩnh viễn. Vui lòng bật trong cài đặt.',
             ),
-          );
-          openAppSettings();
-        }
+            action: SnackBarAction(
+              label: 'Mở Cài đặt',
+              onPressed: openAppSettings,
+            ),
+          ),
+        );
       }
       return;
     }
@@ -171,11 +152,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       );
 
       if (selectedDirectory == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Hủy chọn thư mục')));
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hủy chọn thư mục')),
+        );
         return;
       }
 
@@ -186,78 +165,63 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
       double progress = 0.0;
 
-      // Mở dialog hiện tiến trình tải
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return AlertDialog(
-                  title: const Text("Đang tải ảnh..."),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LinearProgressIndicator(value: progress),
-                      const SizedBox(height: 10),
-                      Text('${(progress * 100).toStringAsFixed(0)}%'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        cancelToken.cancel();
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Huỷ"),
-                    ),
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text("Đang tải ảnh..."),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LinearProgressIndicator(value: progress),
+                    const SizedBox(height: 10),
+                    Text('${(progress * 100).toStringAsFixed(0)}%'),
                   ],
-                );
-              },
-            );
-          },
-        );
-      }
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      cancelToken.cancel();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Huỷ"),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
 
-      // Tiến hành tải ảnh
       await dio.download(
         downloadUrl,
         filePath,
         cancelToken: cancelToken,
         onReceiveProgress: (received, total) {
           if (total > 0) {
-            double newProgress = received / total;
-            progress = newProgress;
-
-            // Cập nhật lại dialog
-            if (context.mounted) {
-              // Tìm dialog và cập nhật
-              (context as Element).markNeedsBuild();
-            }
+            progress = received / total;
+            (context as Element).markNeedsBuild();
           }
         },
       );
 
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Đóng dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã tải xuống ảnh vào $filePath')),
-        );
-      }
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã tải xuống ảnh vào $filePath')),
+      );
     } catch (e) {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // Đóng dialog nếu đang mở
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Tải xuống thất bại: $e')));
-      }
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tải xuống thất bại: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Nếu không có thông tin ảnh hợp lệ, hiển thị trạng thái lỗi/loading
     if (!_isValidPhoto) {
       return Scaffold(
         appBar: AppBar(title: const Text('Lỗi')),
@@ -294,23 +258,18 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 fit: BoxFit.contain,
                 alignment: Alignment.center,
                 filterQuality: FilterQuality.high,
-                placeholder:
-                    (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                errorWidget:
-                    (context, url, error) =>
-                        const Center(child: Icon(Icons.error, size: 50)),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) =>
+                    const Center(child: Icon(Icons.error, size: 50)),
               ),
             ),
-
-            if (_isBanner2AdLoaded)
+            if (_isBanner2AdLoaded && _bannerAd2 != null)
               Container(
                 alignment: Alignment.center,
-                width: _bannerAd2.size.width.toDouble(),
-                height:
-                    _bannerAd2.size.height
-                        .toDouble(), // Đảm bảo chiều cao khớp với banner
-                child: AdWidget(ad: _bannerAd2),
+                width: _bannerAd2!.size.width.toDouble(),
+                height: _bannerAd2!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd2!),
               ),
           ],
         ),
@@ -318,7 +277,6 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  // lưu trữ dữ liệu cục bộ
   Future<void> logAdImpression(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now().toIso8601String();

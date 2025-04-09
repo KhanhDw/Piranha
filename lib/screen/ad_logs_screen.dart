@@ -268,7 +268,7 @@ class _AdLogsScreenState extends State<AdLogsScreen> {
               ),
               child: const Text(
                 'Thông báo: eCPM không cố định, giá trị này phụ thuộc vào đơn vị cung cấp quảng cáo.\n\n'
-                'Chúng tôi sẽ thanh toán mỗi tháng 1 lần vào ngày thứ 5 tuần đầu tiên của tháng. Doanh thu của phải từ 10 USD trở lên',
+                'Chúng tôi sẽ thanh toán mỗi tháng 1 lần vào ngày thứ 5 tuần đầu tiên của tháng. Doanh thu của phải từ 1 USD trở lên',
                 style: TextStyle(color: Colors.white70, fontSize: 13),
                 softWrap: true,
                 textAlign: TextAlign.justify,

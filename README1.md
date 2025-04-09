@@ -34,7 +34,7 @@ Ctrl + P : tìm file bằng copy đường dẫn
 điều chỉnh lại AplicationID tại: android\app\src\main\AndroidManifest.xml
 điều chỉnh lại id quảng cáo thât: "adUnitId:" -->  lib\main.dart
 
-
+flutter build --profile  // công cụ để phân tích thời gian build và xác định các bước tốn nhiều thời gian nhất
 
 
 pass của https://fastsminingpro.net
@@ -49,11 +49,11 @@ thêm sáng tôi
 tạo signingConfigs để bảo về bản release 
 
 open powershell: 
--> keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+-> keytool -genkey -v -keystore <tên-file-key>.keystore -alias <tên-key-alias> -keyalg RSA -keysize 2048 -validity 10000 <--release // nếu build key cho bản release>
 
 sau khi tạo keytool xong cần lấy -> SHA-1 và SHA-256 bằng lệnh bên dưới
--> keytool -list -v -keystore my-release-key.keystore -alias my-key-alias
-
+-> keytool -list -v -keystore <tên-file-key-đã-tạo>.keystore -alias <tên-key-alias-đã-đặt>
+-> vui lòng nhớ password đã đặt trước đó để đăng nhập
 
 Bước 1: Đặt file keystore vào dự án
 Sau khi tạo file my-release-key.keystore, hãy di chuyển nó vào thư mục android/app trong dự án của bạn (ví dụ: D:\Fluter\newv0\flutter_application_2\android\app).

@@ -25,19 +25,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _isLoading = false; // Thêm biến trạng thái loading
 
   // =============================
   // login google
   // =============================
 
-  // Hàm đăng nhập bằng Google
   Future<void> signInWithGoogle() async {
+    setState(() {
+      _isLoading = true; // Bắt đầu loading
+    });
+
     await GoogleSignIn().signOut(); // Đảm bảo luôn logout trước khi login mới
 
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         logger.w("Người dùng đã hủy đăng nhập Google.");
+        setState(() {
+          _isLoading = false; // Dừng loading nếu người dùng hủy
+        });
         return;
       }
 
@@ -48,13 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
         await saveUserData(user); // Lưu lên Firestore
-        await _handleLoginSuccess(user.uid, user.email ?? '');
+        await _handleLoginSuccess(user.uid, user.email ?? '', user.displayName ?? '');
+        logger.i("Đăng nhập Google thành công: ${user.displayName}");
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -63,6 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         }
+        _navigateToLogin(); // Chuyển đến trang chính
       }
     } catch (e) {
       logger.e("Lỗi đăng nhập Google: $e");
@@ -71,6 +80,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đăng nhập Google thất bại')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Dừng loading khi hoàn tất hoặc lỗi
+        });
       }
     }
   }
@@ -87,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // =============================
-  //  test login
+  // test login
   // =============================
 
   void _handleLogin() {
@@ -101,17 +116,17 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // TODO: Thêm xử lý đăng nhập API ở đây
     if (email == 'admin@example.com' && password == '123456') {
       setState(() {
         _errorMessage = null;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Đăng nhập thành công')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập thành công')),
+      );
 
-      _handleLoginSuccess('u001_name', email);
+      _handleLoginSuccess('u001_name', email, 'Tester');
+      _navigateToLogin(); // Chuyển đến trang chính
     } else {
       setState(() {
         _errorMessage = 'Email hoặc mật khẩu không đúng';
@@ -119,14 +134,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleLoginSuccess(String userId, String email) async {
+  Future<void> _handleLoginSuccess(String userId, String email, String userName) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('email', email);
+    await prefs.setString('userName', userName);
 
     UserSession.userId = userId;
     UserSession.email = email;
+    UserSession.userName = userName;
 
+  
+
+  }
+
+
+  void _navigateToLogin() {
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -136,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
       logger.w("Warning: Tried to navigate after widget was unmounted.");
     }
   }
+
 
   @override
   void dispose() {
@@ -147,28 +171,17 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Cho phép cuộn khi bàn phím xuất hiện
-      // appBar: AppBar(
-      //   title: const Text(
-      //     'Đăng nhập',
-      //     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-      //   ),
-      //   backgroundColor: Colors.teal,
-      //   iconTheme: const IconThemeData(color: Colors.white),
-      // ),
+      resizeToAvoidBottomInset: true,
       body: Container(
-        height:
-            MediaQuery.of(context).size.height, // Lấp đầy chiều cao màn hình
+        height: MediaQuery.of(context).size.height,
         child: SafeArea(
           child: SingleChildScrollView(
-            physics:
-                const ClampingScrollPhysics(), // Giới hạn cuộn khi không cần thiết
+            physics: const ClampingScrollPhysics(),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight:
-                      MediaQuery.of(context).size.height -
+                  minHeight: MediaQuery.of(context).size.height -
                       AppBar().preferredSize.height -
                       MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom,
@@ -208,10 +221,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? Icons.visibility
                                     : Icons.visibility_off,
                               ),
-                              onPressed:
-                                  () => setState(
-                                    () => _obscurePassword = !_obscurePassword,
-                                  ),
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                             ),
                             border: const OutlineInputBorder(),
                           ),
@@ -241,39 +253,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ),
-
                     // ==================
                     // login with google
                     // ==================
                     Center(
                       child: ElevatedButton.icon(
-                        icon: const Icon(Icons.login),
-                        label: const Text('Đăng nhập bằng Google'),
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.login),
+                        label: Text(
+                          _isLoading
+                              ? 'Đang xử lý...'
+                              : 'Đăng nhập bằng Google',
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () async {
-                          await signInWithGoogle();
-                          // if (user != null) {
-                          //   ScaffoldMessenger.of(context).showSnackBar(
-                          //     SnackBar(
-                          //       content: Text(
-                          //         'Đăng nhập thành công: ${user.displayName}',
-                          //       ),
-                          //     ),
-                          //   );
-                          // } else {
-                          //   ScaffoldMessenger.of(context).showSnackBar(
-                          //     SnackBar(content: Text('Đăng nhập thất bại')),
-                          //   );
-                          // }
-                        },
+                        onPressed: _isLoading ? null : signInWithGoogle,
                       ),
                     ),
-
                     // ===================
-                    //  đăng ký
+                    // đăng ký
                     // ===================
                     Column(
                       children: [

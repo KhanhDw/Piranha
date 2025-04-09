@@ -33,9 +33,9 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("my-release-key.keystore")
+            storeFile = file("${System.getProperty("user.home")}/.android/key-release-piranha.keystore")
             storePassword = "giakhanh123"
-            keyAlias = "my-key-alias"
+            keyAlias = "key-release"
             keyPassword = "giakhanh123"
         }
     }
@@ -47,8 +47,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         debug {
-            // Có thể sử dụng signingConfig mặc định của debug hoặc cấu hình riêng nếu cần
-            signingConfig = signingConfigs.getByName("debug")
+            //signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
@@ -60,10 +59,9 @@ flutter {
 
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2")) // bản 33 chạy kotlin 2.0.10  - bản 32 chạy 1.9.X
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:20.8.0")
-
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.extra.get("kotlin_version")}") // Sử dụng biến kotlin_version
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.extra.get("kotlin_version")}")
 }
